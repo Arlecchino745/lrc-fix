@@ -1,0 +1,62 @@
+name: Build & Release EXE
+
+on:
+  push:
+    tags:
+      - 'v*'           # triggers on tags like v1.0.0, v2.0.0, etc.
+  workflow_dispatch:   # allows manual trigger from the Actions tab
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Build EXE with PyInstaller
+        run: |
+          pyinstaller --onefile --name lrc-fix --clean lrc-fix.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lrc-fix-exe
+          path: dist/lrc-fix.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # needed to create release
+      id-token: write          # needed for attestation
+      attestations: write
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lrc-fix-exe
+          path: .
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: lrc-fix.exe
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" lrc-fix.exe \
+            --title "$TAG" \
+            --generate-notes

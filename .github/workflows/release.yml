@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -27,7 +27,7 @@ jobs:
           pyinstaller --onefile --name lrc-fix --clean lrc-fix.py
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lrc-fix-exe
           path: dist/lrc-fix.exe
@@ -42,16 +42,16 @@ jobs:
 
     steps:
       - name: Checkout code (for gh CLI context)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: lrc-fix-exe
           path: .
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: lrc-fix.exe
 

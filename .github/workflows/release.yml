@@ -62,4 +62,4 @@ jobs:
         run: |
           gh release create "$TAG" lrc-fix.exe \
             --title "$TAG" \
-            --generate-notes
+            --notes-file RELEASE.md
